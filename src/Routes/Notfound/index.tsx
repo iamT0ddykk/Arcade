@@ -5,9 +5,7 @@ export function NotFound() {
   return (
     <>
       <Container>
-        <div className="content">
-          <BigText>Erro 404</BigText>
-        </div>
+        <BigText>Erro 404</BigText>
       </Container>
     </>
   );

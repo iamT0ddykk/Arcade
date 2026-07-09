@@ -12,13 +12,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Main></Main>}></Route>
-          </Routes>
 
-          <Routes>
             <Route path="/Pacman" element={<Pacman></Pacman>}></Route>
-          </Routes>
-
-          <Routes>
             <Route path="/*" element={<NotFound></NotFound>}></Route>
           </Routes>
         </BrowserRouter>

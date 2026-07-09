@@ -6,6 +6,7 @@ export function Pacman() {
       height="1000"
       style={{ border: "none" }}
       title="Preview"
+      allowFullScreen
     />
   );
 }
