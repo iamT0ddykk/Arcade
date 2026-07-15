@@ -1,12 +1,5 @@
+import { GameIframe } from "../../Components/GameIframe";
+
 export function Pacman() {
-  return (
-    <iframe
-      src="./src/games/Pacmang/pacman.html"
-      width="100%"
-      height="1000"
-      style={{ border: "none" }}
-      title="Preview"
-      allowFullScreen
-    />
-  );
+  return <GameIframe src="./src/games/Pacmang/pacman.html"></GameIframe>;
 }

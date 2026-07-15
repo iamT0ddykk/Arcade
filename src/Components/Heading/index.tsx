@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Logo } from "../Logo";
 import styles from "./styles.module.css";
 console.log(styles);
@@ -7,9 +8,9 @@ export function Heading() {
       <header>
         <Logo></Logo>
         <nav>
-          <a href="">Início</a>
-          <a href="">Jogos</a>
-          <a href="">Categorias</a>
+          <Link to={"/"}>Início</Link>
+          <Link to={"/jogos"}>Jogos</Link>
+          <Link to={"/categorias"}>Categorias</Link>
         </nav>
       </header>
     </>

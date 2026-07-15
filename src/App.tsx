@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { Route, Routes } from "react-router";
 import { Preset } from "./Components/Preset";
 import { Main } from "./Routes/Main";
 import "./styles/App.css";
@@ -9,14 +9,12 @@ function App() {
   return (
     <>
       <Preset>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Main></Main>}></Route>
+        <Routes>
+          <Route path="/" element={<Main></Main>}></Route>
 
-            <Route path="/Pacman" element={<Pacman></Pacman>}></Route>
-            <Route path="/*" element={<NotFound></NotFound>}></Route>
-          </Routes>
-        </BrowserRouter>
+          <Route path="/Pacman" element={<Pacman></Pacman>}></Route>
+          <Route path="/*" element={<NotFound></NotFound>}></Route>
+        </Routes>
       </Preset>
     </>
   );
