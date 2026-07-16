@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tetris - Edição Neon Retro</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap");
+
+      :root {
+        --neon-blue: #2323ff;
+        --neon-blue-light: #6f6fff;
+        --neon-yellow: #ffe14d;
+        --panel-bg: #0b0b1a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: radial-gradient(
+          ellipse at 50% 0%,
+          #131327 0%,
+          #05050c 60%,
+          #000 100%
+        );
+        color: white;
+        font-family: "Rubik", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(
+            1px 1px at 10% 20%,
+            rgba(255, 255, 255, 0.5),
+            transparent
+          ),
+          radial-gradient(
+            1px 1px at 80% 30%,
+            rgba(255, 255, 255, 0.4),
+            transparent
+          ),
+          radial-gradient(
+            1.5px 1.5px at 60% 70%,
+            rgba(255, 255, 255, 0.35),
+            transparent
+          ),
+          radial-gradient(
+            1px 1px at 30% 85%,
+            rgba(255, 255, 255, 0.4),
+            transparent
+          ),
+          radial-gradient(
+            1.5px 1.5px at 90% 80%,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          ),
+          radial-gradient(
+            1px 1px at 45% 15%,
+            rgba(255, 255, 255, 0.4),
+            transparent
+          );
+        background-size: 100% 100%;
+        opacity: 0.7;
+        pointer-events: none;
+        animation: twinkle 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes twinkle {
+        from {
+          opacity: 0.4;
+        }
+        to {
+          opacity: 0.9;
+        }
+      }
+
+      h1 {
+        margin: 0 0 12px 0;
+        font-family: "Press Start 2P", monospace;
+        font-size: 26px;
+        letter-spacing: 2px;
+        color: var(--neon-yellow);
+        text-shadow:
+          0 0 6px rgba(255, 225, 77, 0.9),
+          0 0 18px rgba(255, 225, 77, 0.6),
+          0 0 36px rgba(255, 100, 0, 0.4);
+        text-align: center;
+      }
+
+      #hud {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+        margin-bottom: 14px;
+        font-family: "Press Start 2P", monospace;
+        font-size: 13px;
+      }
+
+      #score,
+      #lines-panel {
+        background: linear-gradient(180deg, #17173a, #0a0a1c);
+        border: 2px solid var(--neon-blue-light);
+        border-radius: 10px;
+        padding: 8px 16px;
+        box-shadow:
+          0 0 10px rgba(70, 70, 255, 0.55),
+          inset 0 0 12px rgba(70, 70, 255, 0.25);
+        color: #ffe14d;
+        text-shadow: 0 0 6px rgba(255, 225, 77, 0.7);
+      }
+
+      #board-wrap {
+        position: relative;
+        border-radius: 16px;
+        padding: 10px;
+        background: linear-gradient(160deg, #0d0d22, #030308);
+        box-shadow:
+          0 0 0 2px rgba(80, 80, 255, 0.4),
+          0 0 40px rgba(35, 35, 255, 0.45),
+          0 20px 60px rgba(0, 0, 0, 0.7);
+      }
+
+      canvas {
+        display: block;
+        border-radius: 8px;
+        background-color: #000;
+      }
+
+      #overlay {
+        position: absolute;
+        inset: 10px;
+        background: rgba(0, 0, 0, 0.9);
+        border-radius: 8px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        font-family: "Press Start 2P", monospace;
+        text-align: center;
+      }
+
+      #overlay-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        color: #ff2d2d;
+        text-shadow: 0 0 15px rgba(255, 45, 45, 0.8);
+      }
+
+      #overlay-score {
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        color: #ffe14d;
+        margin-bottom: 40px;
+      }
+
+      .reset-btn {
+        background: linear-gradient(180deg, #ffe14d, #ffb400);
+        color: #000;
+        border: none;
+        padding: 14px 28px;
+        font-family: "Press Start 2P", monospace;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(255, 225, 77, 0.6);
+        transition:
+          transform 0.1s,
+          box-shadow 0.2s;
+      }
+
+      .reset-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(255, 225, 77, 0.9);
+      }
+
+      footer {
+        margin-top: 14px;
+        font-size: 12px;
+        color: #8888aa;
+        letter-spacing: 0.5px;
+        text-align: center;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>★ TETRIS ★</h1>
+    <div id="hud">
+      <div id="score">PONTOS: 0</div>
+      <div id="lines-panel">LINHAS: 0</div>
+    </div>
+    <div id="board-wrap">
+      <canvas id="canvas" width="360" height="720"></canvas>
+
+      <div id="overlay">
+        <div id="overlay-title">GAME OVER</div>
+        <div id="overlay-score">Pontuação final: 0</div>
+        <button class="reset-btn" onclick="resetGame()">JOGAR DE NOVO</button>
+      </div>
+    </div>
+    <footer>
+      Setas Esquerda/Direita: Mover | Seta Cima: Rotacionar<br />
+      Seta Baixo: Queda Rápida | Barra de Espaço: Queda Instantânea
+    </footer>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const scoreElement = document.getElementById("score");
+      const linesElement = document.getElementById("lines-panel");
+      const overlay = document.getElementById("overlay");
+      const overlayScore = document.getElementById("overlay-score");
+
+      const COLS = 10;
+      const ROWS = 20;
+      const BLOCK_SIZE = 36;
+
+      let score = 0;
+      let linesCleared = 0;
+      let gameOver = false;
+      let board = [];
+
+      let dropCounter = 0;
+      let dropInterval = 1000; // Começa caindo a cada 1 segundo
+      let lastTime = 0;
+
+      // Paleta de Cores Neon Combinando com o Pacman (Principal e Sombra escura)
+      const COLORS = {
+        1: { light: "#ffe14d", dark: "#b39800" }, // Amarelo (Pac-man) - Peça O
+        2: { light: "#ff2d2d", dark: "#8a0000" }, // Vermelho (Blinky) - Peça Z
+        3: { light: "#ff9de8", dark: "#a1006b" }, // Rosa (Pinky) - Peça T
+        4: { light: "#4de1ff", dark: "#006a8a" }, // Ciano (Inky) - Peça I
+        5: { light: "#ffb04d", dark: "#a15a00" }, // Laranja (Clyde) - Peça L
+        6: { light: "#4dffa6", dark: "#00994d" }, // Verde Neon - Peça S
+        7: { light: "#9d4dff", dark: "#4a00a1" }, // Roxo Neon - Peça J
+      };
+
+      // Formatos das Peças Tradicionais de Tetris
+      const SHAPES = {
+        O: [
+          [1, 1],
+          [1, 1],
+        ],
+        Z: [
+          [2, 2, 0],
+          [0, 2, 2],
+          [0, 0, 0],
+        ],
+        T: [
+          [0, 3, 0],
+          [3, 3, 3],
+          [0, 0, 0],
+        ],
+        I: [
+          [0, 0, 0, 0],
+          [4, 4, 4, 4],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+        ],
+        L: [
+          [0, 0, 5],
+          [5, 5, 5],
+          [0, 0, 0],
+        ],
+        S: [
+          [0, 6, 6],
+          [6, 6, 0],
+          [0, 0, 0],
+        ],
+        J: [
+          [7, 0, 0],
+          [7, 7, 7],
+          [0, 0, 0],
+        ],
+      };
+
+      let player = {
+        pos: { x: 0, y: 0 },
+        matrix: null,
+      };
+
+      // Inicializa ou limpa a matriz do tabuleiro
+      function createBoard() {
+        const matrix = [];
+        for (let r = 0; r < ROWS; r++) {
+          matrix.push(new Array(COLS).fill(0));
+        }
+        return matrix;
+      }
+
+      // Gera uma nova peça aleatória no topo
+      function playerReset() {
+        const pieces = "OZTLSIJ";
+        const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+        player.matrix = SHAPES[randomPiece];
+        player.pos.y = 0;
+        player.pos.x = Math.floor((COLS - player.matrix[0].length) / 2);
+
+        // Se brotar colidindo, é Game Over
+        if (collide(board, player)) {
+          gameOver = true;
+          overlayScore.innerText = "Pontuação final: " + score;
+          overlay.style.display = "flex";
+        }
+      }
+
+      // Lógica de colisão estrutural do tabuleiro/paredes
+      function collide(board, player) {
+        const m = player.matrix;
+        const o = player.pos;
+        for (let r = 0; r < m.length; ++r) {
+          for (let c = 0; c < m[r].length; ++c) {
+            if (
+              m[r][c] !== 0 &&
+              (board[r + o.y] === undefined ||
+                board[r + o.y][c + o.x] === undefined ||
+                board[r + o.y][c + o.x] !== 0)
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      // Mescla a peça caída fixando-a permanentemente no tabuleiro
+      function merge(board, player) {
+        player.matrix.forEach((row, r) => {
+          row.forEach((value, c) => {
+            if (value !== 0) {
+              board[r + player.pos.y][c + player.pos.x] = value;
+            }
+          });
+        });
+      }
+
+      // Move a peça para baixo
+      function playerDrop() {
+        player.pos.y++;
+        if (collide(board, player)) {
+          player.pos.y--;
+          merge(board, player);
+          playerReset();
+          arenaSweep();
+        }
+        dropCounter = 0;
+      }
+
+      // Queda instantânea (Espaço)
+      function playerHardDrop() {
+        while (!collide(board, player)) {
+          player.pos.y++;
+        }
+        player.pos.y--;
+        merge(board, player);
+        playerReset();
+        arenaSweep();
+        dropCounter = 0;
+      }
+
+      // Move para os lados tratando colisões
+      function playerMove(dir) {
+        player.pos.x += dir;
+        if (collide(board, player)) {
+          player.pos.x -= dir;
+        }
+      }
+
+      // Rotaciona a matriz da peça
+      function rotate(matrix, dir) {
+        for (let y = 0; y < matrix.length; ++y) {
+          for (let x = 0; x < y; ++x) {
+            [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+          }
+        }
+        if (dir > 0) matrix.forEach((row) => row.reverse());
+        else matrix.reverse();
+      }
+
+      function playerRotate() {
+        const pos = player.pos.x;
+        let offset = 1;
+        rotate(player.matrix, 1);
+        // Sistema simples de "Wall Kick" para não girar travando nas paredes externas
+        while (collide(board, player)) {
+          player.pos.x += offset;
+          offset = -(offset + (offset > 0 ? 1 : -1));
+          if (offset > player.matrix[0].length) {
+            rotate(player.matrix, -1);
+            player.pos.x = pos;
+            return;
+          }
+        }
+      }
+
+      // Varre linhas cheias, computa pontuação e aumenta velocidade progressivamente
+      function arenaSweep() {
+        let rowCount = 1;
+        outer: for (let r = ROWS - 1; r >= 0; --r) {
+          for (let c = 0; c < COLS; ++c) {
+            if (board[r][c] === 0) {
+              continue outer;
+            }
+          }
+          const row = board.splice(r, 1)[0].fill(0);
+          board.unshift(row);
+          ++r;
+
+          score += rowCount * 100;
+          linesCleared++;
+          rowCount *= 2; // Bônus por linhas duplas/triplas simultâneas
+        }
+        scoreElement.innerText = "PONTOS: " + score;
+        linesElement.innerText = "LINHAS: " + linesCleared;
+
+        // Aumenta a velocidade do jogo dinamicamente a cada linha limpa
+        dropInterval = Math.max(100, 1000 - linesCleared * 30);
+      }
+
+      // Renderiza um único bloco estilizado com gradiente neon e brilho
+      function drawBlock(x, y, colorId) {
+        const colors = COLORS[colorId];
+        if (!colors) return;
+
+        const bx = x * BLOCK_SIZE;
+        const by = y * BLOCK_SIZE;
+
+        const grad = ctx.createLinearGradient(bx, by, bx, by + BLOCK_SIZE);
+        grad.addColorStop(0, colors.light);
+        grad.addColorStop(1, colors.dark);
+
+        ctx.save();
+        ctx.fillStyle = grad;
+        ctx.shadowColor = colors.light;
+        ctx.shadowBlur = 4;
+
+        // Desenha o bloco arredondado interno
+        const pad = 2;
+        const r = 4;
+        ctx.beginPath();
+        ctx.moveTo(bx + pad + r, by + pad);
+        ctx.arcTo(
+          bx + BLOCK_SIZE - pad,
+          by + pad,
+          bx + BLOCK_SIZE - pad,
+          by + BLOCK_SIZE - pad,
+          r,
+        );
+        ctx.arcTo(
+          bx + BLOCK_SIZE - pad,
+          by + BLOCK_SIZE - pad,
+          bx + pad,
+          by + BLOCK_SIZE - pad,
+          r,
+        );
+        ctx.arcTo(bx + pad, by + BLOCK_SIZE - pad, bx + pad, by + pad, r);
+        ctx.arcTo(bx + pad, by + pad, bx + BLOCK_SIZE - pad, by + pad, r);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Desenha as grades de fundo usando o azul neon clássico do Pacman
+      function drawGrid() {
+        ctx.strokeStyle = "rgba(35, 35, 255, 0.15)";
+        ctx.lineWidth = 1;
+        for (let c = 0; c < COLS; c++) {
+          ctx.beginPath();
+          ctx.moveTo(c * BLOCK_SIZE, 0);
+          ctx.lineTo(c * BLOCK_SIZE, canvas.height);
+          ctx.stroke();
+        }
+        for (let r = 0; r < ROWS; r++) {
+          ctx.beginPath();
+          ctx.moveTo(0, r * BLOCK_SIZE);
+          ctx.lineTo(canvas.width, r * BLOCK_SIZE);
+          ctx.stroke();
+        }
+      }
+
+      // Renderização principal do jogo
+      function draw() {
+        // Limpa a tela com fundo levemente azulado
+        ctx.fillStyle = "#04040c";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawGrid();
+
+        // Desenha os blocos fixos do tabuleiro
+        board.forEach((row, r) => {
+          row.forEach((value, c) => {
+            if (value !== 0) {
+              drawBlock(c, r, value);
+            }
+          });
+        });
+
+        // Desenha a peça atual controlada pelo jogador
+        if (player.matrix) {
+          player.matrix.forEach((row, r) => {
+            row.forEach((value, c) => {
+              if (value !== 0) {
+                drawBlock(c + player.pos.x, r + player.pos.y, value);
+              }
+            });
+          });
+        }
+      }
+
+      // Loop principal de frames
+      function update(time = 0) {
+        if (gameOver) return;
+
+        const deltaTime = time - lastTime;
+        lastTime = time;
+
+        dropCounter += deltaTime;
+        if (dropCounter > dropInterval) {
+          playerDrop();
+        }
+
+        draw();
+        requestAnimationFrame(update);
+      }
+
+      // Controle do Teclado
+      window.addEventListener("keydown", (e) => {
+        if (gameOver) return;
+        switch (e.key) {
+          case "ArrowLeft":
+            playerMove(-1);
+            break;
+          case "ArrowRight":
+            playerMove(1);
+            break;
+          case "ArrowDown":
+            playerDrop();
+            break;
+          case "ArrowUp":
+            playerRotate();
+            break;
+          case " ":
+            playerHardDrop();
+            e.preventDefault();
+            break;
+        }
+      });
+
+      // Função de Reset total para reiniciar o estado do jogo
+      function resetGame() {
+        board = createBoard();
+        score = 0;
+        linesCleared = 0;
+        dropInterval = 1000;
+        gameOver = false;
+        scoreElement.innerText = "PONTOS: 0";
+        linesElement.innerText = "LINHAS: 0";
+        overlay.style.display = "none";
+        playerReset();
+        update();
+      }
+
+      // Inicia o jogo pela primeira vez
+      resetGame();
+    </script>
+  </body>
+</html>

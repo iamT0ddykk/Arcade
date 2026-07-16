@@ -66,6 +66,7 @@
   cursor: pointer;
 
   transition: 0.25s;
+  text-decoration: none;
 }
 
 .card-button:hover {
