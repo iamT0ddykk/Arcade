@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEON RUNNER // DINO CYBERPUNK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --yellow: #ffe14d;
+        --blue: #2323ff;
+        --cyan: #39ffe4;
+        --deep1: #131327;
+        --deep2: #0a0714;
+        --panel1: #1a1633;
+        --panel2: #0d0a1f;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        background: #0a0714;
+        overflow: hidden;
+        font-family: "Rubik", sans-serif;
+        color: #eaeaff;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        position: relative;
+      }
+
+      h1.title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 22px;
+        text-align: center;
+        letter-spacing: 2px;
+        color: var(--yellow);
+        text-shadow: 0 0 6px var(--yellow);
+        margin-bottom: 14px;
+      }
+
+      h1.title span {
+        color: var(--cyan);
+        text-shadow: 0 0 6px var(--cyan);
+      }
+
+      #board-wrap {
+        position: relative;
+        z-index: 2;
+        padding: 22px;
+        border-radius: 26px;
+        background: #100c24;
+        border: 2px solid rgba(35, 35, 255, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 804px;
+        max-width: 95%;
+      }
+
+      #hud {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .hud-panel {
+        flex: 1;
+        background: #0d0a1f;
+        border: 1.5px solid rgba(57, 255, 228, 0.25);
+        border-radius: 14px;
+        padding: 10px 16px;
+        text-align: center;
+      }
+
+      .hud-panel .label {
+        font-family: "Press Start 2P", cursive;
+        font-size: 9px;
+        color: var(--cyan);
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+      }
+
+      .hud-panel .value {
+        font-family: "Press Start 2P", cursive;
+        font-size: 18px;
+        color: var(--yellow);
+      }
+
+      #main-area {
+        display: flex;
+        gap: 16px;
+        width: 100%;
+      }
+
+      #canvas-holder {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 225, 77, 0.25);
+        flex: 1;
+      }
+
+      canvas {
+        display: block;
+        background: #06040f;
+        transition: background-color 1s ease;
+        width: 100%;
+        height: auto;
+      }
+
+      /* Painel de Customização */
+      #custom-panel {
+        width: 180px;
+        background: #0d0a1f;
+        border: 2px solid rgba(35, 35, 255, 0.4);
+        border-radius: 16px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .custom-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 10px;
+        color: var(--cyan);
+        text-shadow: 0 0 5px var(--cyan);
+        text-align: center;
+        margin-bottom: 6px;
+      }
+
+      .custom-btn {
+        font-family: "Rubik", sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        color: #eaeaff;
+        background: rgba(35, 35, 255, 0.15);
+        border: 1.5px solid rgba(35, 35, 255, 0.4);
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .custom-btn:hover {
+        background: rgba(57, 255, 228, 0.15);
+        border-color: var(--cyan);
+        transform: translateX(3px);
+      }
+
+      .custom-btn.active {
+        background: rgba(255, 225, 77, 0.2);
+        border-color: var(--yellow);
+        box-shadow: 0 0 8px rgba(255, 225, 77, 0.3);
+        color: var(--yellow);
+      }
+
+      /* Seletor de Cores Personalizado */
+      .color-picker-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 4px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        border: 1px dashed rgba(57, 255, 228, 0.2);
+      }
+
+      .color-picker-label {
+        font-family: "Press Start 2P", cursive;
+        font-size: 8px;
+        color: #eaeaff;
+        text-align: center;
+      }
+
+      .color-input-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      #dino-color {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 40px;
+        height: 40px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+      }
+
+      #dino-color::-webkit-color-swatch {
+        border-radius: 8px;
+        border: 2px solid var(--cyan);
+        box-shadow: 0 0 8px var(--cyan);
+      }
+
+      #dino-color::-moz-color-swatch {
+        border-radius: 8px;
+        border: 2px solid var(--cyan);
+        box-shadow: 0 0 8px var(--cyan);
+      }
+
+      #overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(6, 4, 15, 0.92);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        text-align: center;
+        z-index: 5;
+        padding: 20px;
+      }
+
+      #overlay h2 {
+        font-family: "Press Start 2P", cursive;
+        font-size: 20px;
+        color: #ff4d6d;
+        text-shadow: 0 0 8px #ff4d6d;
+        letter-spacing: 1px;
+      }
+
+      #overlay .final-score {
+        font-family: "Press Start 2P", cursive;
+        font-size: 14px;
+        color: var(--cyan);
+        margin-top: 4px;
+      }
+
+      #overlay .final-score b {
+        color: var(--yellow);
+      }
+
+      #overlay .best-tag {
+        font-family: "Rubik", sans-serif;
+        font-size: 13px;
+        color: #a9ffcf;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      #restart-btn {
+        margin-top: 10px;
+        font-family: "Press Start 2P", cursive;
+        font-size: 12px;
+        padding: 14px 26px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        color: #1a1200;
+        background: var(--yellow);
+        box-shadow: 0 4px 0 #a97800;
+        transition: transform 0.1s ease;
+        letter-spacing: 1px;
+      }
+
+      #restart-btn:hover {
+        transform: scale(1.04);
+      }
+
+      #restart-btn:active {
+        transform: scale(0.98) translateY(2px);
+        box-shadow: 0 2px 0 #a97800;
+      }
+
+      #help {
+        text-align: center;
+        font-family: "Rubik", sans-serif;
+        font-size: 13px;
+        color: #b7b3e0;
+        line-height: 1.6;
+      }
+
+      #help b {
+        color: var(--cyan);
+      }
+
+      #start-hint {
+        font-family: "Press Start 2P", cursive;
+        font-size: 11px;
+        color: var(--yellow);
+        text-align: center;
+        animation: pulseHint 1.6s ease-in-out infinite;
+      }
+
+      @keyframes pulseHint {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #main-area {
+          flex-direction: column-reverse;
+        }
+        #custom-panel {
+          width: 100%;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .custom-btn {
+          flex: 1;
+          min-width: 120px;
+          justify-content: center;
+        }
+        .color-picker-wrapper {
+          width: 100%;
+          max-width: 200px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        #board-wrap {
+          padding: 14px;
+          border-radius: 18px;
+        }
+        h1.title {
+          font-size: 15px;
+        }
+        .hud-panel .value {
+          font-size: 14px;
+        }
+        #overlay h2 {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board-wrap">
+      <h1 class="title">NEON <span>RUNNER</span></h1>
+
+      <div id="hud">
+        <div class="hud-panel">
+          <div class="label">PONTOS</div>
+          <div class="value" id="score-val">0000</div>
+        </div>
+        <div class="hud-panel">
+          <div class="label">RECORDE</div>
+          <div class="value" id="best-val">0000</div>
+        </div>
+        <div class="hud-panel">
+          <div class="label">VELOCIDADE</div>
+          <div class="value" id="speed-val">1.0x</div>
+        </div>
+      </div>
+
+      <div id="main-area">
+        <div id="canvas-holder">
+          <canvas id="game" width="760" height="280"></canvas>
+
+          <div id="overlay">
+            <h2>GAME OVER</h2>
+            <div class="final-score">
+              PONTOS: <b id="overlay-score">0000</b>
+            </div>
+            <div class="best-tag" id="overlay-best-tag" style="display: none">
+              ✦ NOVO RECORDE ✦
+            </div>
+            <button id="restart-btn">JOGAR DE NOVO</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="help">
+        Pressione <b>ESPAÇO</b> ou <b>↑</b> para pular · Segure <b>↓</b> para
+        abaixar<br />
+        Sobreviva ao tremor apocalíptico de <b>5 segundos</b> do meteoro! ☄️
+      </div>
+      <div id="start-hint">TOQUE OU APERTE ESPAÇO PARA COMEÇAR</div>
+      <div id="custom-panel">
+        <div class="custom-title">ARMARIO</div>
+        <button class="custom-btn" id="hat-btn">🎩 Cartola</button>
+        <button class="custom-btn" id="glasses-btn">🕶️ Óculos</button>
+        <button class="custom-btn" id="mustache-btn">👨 Bigode</button>
+        <button class="custom-btn" id="scarf-btn">🧣 Cachecol</button>
+
+        <div class="color-picker-wrapper">
+          <div class="color-picker-label">COR DINO</div>
+          <div class="color-input-container">
+            <input type="color" id="dino-color" value="#39ffe4" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d", { alpha: false });
+        const W = canvas.width;
+        const H = canvas.height;
+        const GROUND_Y = H - 40;
+
+        const scoreEl = document.getElementById("score-val");
+        const bestEl = document.getElementById("best-val");
+        const speedEl = document.getElementById("speed-val");
+        const overlay = document.getElementById("overlay");
+        const overlayScore = document.getElementById("overlay-score");
+        const overlayBestTag = document.getElementById("overlay-best-tag");
+        const restartBtn = document.getElementById("restart-btn");
+        const startHint = document.getElementById("start-hint");
+
+        // Elementos de Customização
+        const hatBtn = document.getElementById("hat-btn");
+        const glassesBtn = document.getElementById("glasses-btn");
+        const mustacheBtn = document.getElementById("mustache-btn");
+        const scarfBtn = document.getElementById("scarf-btn");
+        const colorInput = document.getElementById("dino-color");
+
+        const STORAGE_KEY = "neonRunnerBestScore";
+
+        let dino, obstacles, particles, clouds, items;
+        let speed, baseSpeed, speedMultiplier, score, frame, gravity;
+        let isRunning, isGameOver, started;
+        let spawnTimer, spawnInterval;
+        let bestScore = Number(localStorage.getItem(STORAGE_KEY)) || 0;
+        bestEl.textContent = String(bestScore).padStart(4, "0");
+
+        // Variável de Cor Customizada do Dino
+        let dinoCustomColor = colorInput.value;
+
+        // Atualiza a cor em tempo real quando o jogador muda o input
+        colorInput.addEventListener("input", (e) => {
+          dinoCustomColor = e.target.value;
+          draw(); // Redesenha para ver a alteração mesmo com o jogo pausado
+        });
+
+        // Variáveis Globais de Customização Ativas
+        let equipped = {
+          hat: false,
+          glasses: false,
+          mustache: false,
+          scarf: false,
+        };
+
+        // Configuração dos botões de estilo
+        [
+          { btn: hatBtn, key: "hat" },
+          { btn: glassesBtn, key: "glasses" },
+          { btn: mustacheBtn, key: "mustache" },
+          { btn: scarfBtn, key: "scarf" },
+        ].forEach((item) => {
+          item.btn.addEventListener("click", () => {
+            equipped[item.key] = !equipped[item.key];
+            item.btn.classList.toggle("active", equipped[item.key]);
+            draw();
+          });
+        });
+
+        // Variáveis de Eventos (Dia/Noite, Tremor Extremo & Flash)
+        let isDayTime = false;
+        let dayTransition = 0;
+        let screenShake = 0;
+        let shakeTimer = 0;
+        let flashOpacity = 0;
+        let meteor = null;
+        let nextMeteorTimer = 200;
+
+        let lastTime = 0;
+        const FPS = 60;
+        const FRAME_DURATION = 1000 / FPS;
+        let rafId = null;
+
+        // Função utilitária para descobrir se a cor de fundo do Dino é clara ou escura (para pintar o olho de branco ou preto)
+        function getLightness(hex) {
+          hex = hex.replace("#", "");
+          const r = parseInt(hex.substr(0, 2), 16);
+          const g = parseInt(hex.substr(2, 2), 16);
+          const b = parseInt(hex.substr(4, 2), 16);
+          return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+
+        function createDino() {
+          return {
+            x: 60,
+            y: GROUND_Y - 42,
+            width: 40,
+            height: 42,
+            duckHeight: 24,
+            vy: 0,
+            isDucking: false,
+            isJumping: false,
+            groundY: GROUND_Y - 42,
+            legPhase: 0,
+          };
+        }
+
+        function resetGame() {
+          dino = createDino();
+          obstacles = [];
+          particles = [];
+          items = [];
+          clouds = [];
+          for (let i = 0; i < 3; i++) {
+            clouds.push({
+              x: Math.random() * W,
+              y: 20 + Math.random() * 60,
+              size: 15 + Math.random() * 15,
+              speedMul: 0.2 + Math.random() * 0.2,
+            });
+          }
+
+          baseSpeed = 6;
+          speedMultiplier = 1.0;
+          speed = baseSpeed;
+          score = 0;
+          frame = 0;
+          gravity = 0.85;
+          spawnTimer = 0;
+          spawnInterval = 70;
+
+          isDayTime = false;
+          dayTransition = 0;
+          screenShake = 0;
+          shakeTimer = 0;
+          flashOpacity = 0;
+          meteor = null;
+          nextMeteorTimer = 300;
+
+          isRunning = false;
+          isGameOver = false;
+          started = false;
+
+          overlay.style.display = "none";
+          startHint.style.display = "block";
+          scoreEl.textContent = "0000";
+          speedEl.textContent = "1.0x";
+
+          draw();
+        }
+
+        function startGame() {
+          if (isGameOver) return;
+          if (!started) {
+            started = true;
+            isRunning = true;
+            startHint.style.display = "none";
+            lastTime = performance.now();
+            loop(lastTime);
+          }
+        }
+
+        function jump() {
+          if (isGameOver) {
+            return;
+          }
+          if (!started) {
+            startGame();
+            return;
+          }
+          if (!dino.isJumping && !dino.isDucking) {
+            dino.isJumping = true;
+            dino.vy = -15.5;
+          }
+        }
+
+        function duck(state) {
+          if (!dino.isJumping) {
+            dino.isDucking = state;
+          }
+        }
+
+        function spawnObstacle() {
+          const r = Math.random();
+
+          if (r < 0.25) {
+            const segs = 1 + Math.floor(Math.random() * 3);
+            const w = 16 + segs * 8;
+            const h = 30 + segs * 6;
+            obstacles.push({
+              type: "cactus",
+              x: W + 20,
+              y: GROUND_Y - h,
+              width: w,
+              height: h,
+              segs,
+            });
+          } else if (r < 0.5) {
+            const heights = [GROUND_Y - 35, GROUND_Y - 75, GROUND_Y - 115];
+            obstacles.push({
+              type: "flyer",
+              x: W + 20,
+              y: heights[Math.floor(Math.random() * heights.length)],
+              width: 36,
+              height: 24,
+              wingPhase: 0,
+            });
+          } else if (r < 0.75) {
+            obstacles.push({
+              type: "laser",
+              x: W + 20,
+              y: GROUND_Y - 38,
+              width: 50,
+              height: 12,
+            });
+          } else {
+            obstacles.push({
+              type: "landmine",
+              x: W + 20,
+              y: GROUND_Y - 10,
+              width: 22,
+              height: 10,
+              flashTimer: 0,
+            });
+          }
+
+          if (Math.random() < 0.3) {
+            items.push({
+              type: "speed_fruit",
+              x: W + 120,
+              y: GROUND_Y - 50 - Math.random() * 40,
+              width: 18,
+              height: 18,
+              bobPhase: Math.random() * Math.PI,
+            });
+          }
+        }
+
+        function update() {
+          frame++;
+
+          // --- CICLO DIA E NOITE: ALTERNA A CADA 500 PONTOS ---
+          const currentPeriod = Math.floor(score / 500);
+          isDayTime = currentPeriod % 2 === 1;
+
+          if (isDayTime && dayTransition < 1) {
+            dayTransition += 0.01;
+          } else if (!isDayTime && dayTransition > 0) {
+            dayTransition -= 0.01;
+          }
+
+          // --- EVENTO: METEORO COM TREMOR APOCALÍPTICO DE 5 SEGUNDOS ---
+          nextMeteorTimer--;
+          if (nextMeteorTimer <= 0 && !meteor) {
+            meteor = {
+              x: W + 60,
+              y: -60,
+              vx: -14,
+              vy: 9,
+              size: 16,
+            };
+          }
+
+          if (meteor) {
+            meteor.x += meteor.vx;
+            meteor.y += meteor.vy;
+
+            particles.push({
+              x: meteor.x,
+              y: meteor.y,
+              vx: -meteor.vx * 0.2 + (Math.random() - 0.5) * 3,
+              vy: -meteor.vy * 0.2 + (Math.random() - 0.5) * 3,
+              color: "rgba(255, 110, 0, 0.9)",
+              life: 25,
+            });
+
+            if (meteor.y >= GROUND_Y || meteor.x < -60) {
+              screenShake = 130;
+              shakeTimer = 300;
+              flashOpacity = 0.9;
+
+              const impactX = Math.max(0, Math.min(W, meteor.x));
+              for (let i = 0; i < 60; i++) {
+                particles.push({
+                  x: impactX,
+                  y: GROUND_Y,
+                  vx: (Math.random() - 0.5) * 26,
+                  vy: -Math.random() * 18 - 5,
+                  color: i % 2 === 0 ? "#ff1a00" : "#ffe14d",
+                  life: 50,
+                });
+              }
+
+              meteor = null;
+              nextMeteorTimer = 900 + Math.random() * 600;
+            }
+          }
+
+          if (shakeTimer > 0) {
+            shakeTimer--;
+            screenShake = (shakeTimer / 300) * 130;
+          } else {
+            screenShake = 0;
+          }
+
+          if (flashOpacity > 0) {
+            flashOpacity -= 0.04;
+            if (flashOpacity < 0) flashOpacity = 0;
+          }
+
+          // --- SISTEMA DE VELOCIDADE (LIMITE DE 3x) ---
+          const maxTargetSpeed = baseSpeed * 3.0;
+          const targetSpeed = Math.min(baseSpeed + score / 200, maxTargetSpeed);
+
+          if (speedMultiplier > 1.0) {
+            speedMultiplier -= 0.0015;
+          } else {
+            speedMultiplier = 1.0;
+          }
+
+          speed = Math.min(targetSpeed * speedMultiplier, maxTargetSpeed);
+          speedEl.textContent =
+            Math.min(speed / baseSpeed, 3.0).toFixed(1) + "x";
+
+          if (dino.isJumping) {
+            dino.vy += gravity;
+            dino.y += dino.vy;
+            if (dino.y >= dino.groundY) {
+              dino.y = dino.groundY;
+              dino.vy = 0;
+              dino.isJumping = false;
+            }
+          }
+          dino.legPhase += dino.isJumping ? 0 : 0.4;
+
+          clouds.forEach((c) => {
+            c.x -= speed * c.speedMul * 0.4;
+            if (c.x < -40) {
+              c.x = W + 40;
+              c.y = 20 + Math.random() * 60;
+            }
+          });
+
+          spawnTimer++;
+          if (spawnTimer >= spawnInterval) {
+            spawnTimer = 0;
+            spawnInterval = 55 + Math.random() * 45 - Math.min(score / 25, 25);
+            spawnInterval = Math.max(spawnInterval, 42);
+            spawnObstacle();
+          }
+
+          // Atualizar obstáculos
+          for (let i = obstacles.length - 1; i >= 0; i--) {
+            const o = obstacles[i];
+            o.x -= speed;
+            if (o.type === "flyer") {
+              o.wingPhase += 0.3;
+            }
+            if (o.type === "landmine") {
+              o.flashTimer += 0.2;
+            }
+
+            if (o.x + o.width < -30) {
+              obstacles.splice(i, 1);
+              continue;
+            }
+            if (checkCollision(dino, o)) {
+              triggerGameOver();
+              return;
+            }
+          }
+
+          // Atualizar Itens/Power-ups
+          for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
+            item.x -= speed;
+            item.bobPhase += 0.08;
+
+            if (item.x + item.width < -30) {
+              items.splice(i, 1);
+              continue;
+            }
+
+            if (checkCollision(dino, item)) {
+              if (item.type === "speed_fruit") {
+                speedMultiplier = Math.min(1.5, speedMultiplier + 0.2);
+
+                for (let p = 0; p < 8; p++) {
+                  particles.push({
+                    x: item.x,
+                    y: item.y,
+                    vx: (Math.random() - 0.2) * 5,
+                    vy: (Math.random() - 0.5) * 4,
+                    color: "#39ff14",
+                    life: 20,
+                  });
+                }
+              }
+              items.splice(i, 1);
+            }
+          }
+
+          // Gera poeira de corrida com a mesma cor selecionada para o Dino!
+          if (!dino.isJumping && frame % 5 === 0) {
+            particles.push({
+              x: dino.x + 4,
+              y: GROUND_Y + 2,
+              vx: -speed * 0.5,
+              vy: -0.5,
+              color: speedMultiplier > 1.0 ? "#39ff14" : dinoCustomColor,
+              life: 15,
+            });
+          }
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life <= 0) particles.splice(i, 1);
+          }
+
+          score += 0.7 + speed * 0.03;
+          scoreEl.textContent = String(Math.floor(score)).padStart(4, "0");
+        }
+
+        function getDinoBox() {
+          if (dino.isDucking && !dino.isJumping) {
+            return {
+              x: dino.x,
+              y: GROUND_Y - dino.duckHeight,
+              width: dino.width + 12,
+              height: dino.duckHeight,
+            };
+          }
+          return {
+            x: dino.x,
+            y: dino.y,
+            width: dino.width,
+            height: dino.height,
+          };
+        }
+
+        function checkCollision(d, o) {
+          const box = getDinoBox();
+
+          let padX = 5;
+          let padY = 4;
+
+          if (o.type === "laser") {
+            padX = 2;
+            padY = 1;
+          } else if (o.type === "landmine") {
+            padX = 1;
+            padY = 1;
+          }
+
+          return (
+            box.x + padX < o.x + o.width &&
+            box.x + box.width - padX > o.x &&
+            box.y + padY < o.y + o.height &&
+            box.y + box.height - padY > o.y
+          );
+        }
+
+        function triggerGameOver() {
+          isGameOver = true;
+          isRunning = false;
+          cancelAnimationFrame(rafId);
+
+          const finalScore = Math.floor(score);
+          overlayScore.textContent = String(finalScore).padStart(4, "0");
+
+          let newRecord = false;
+          if (finalScore > bestScore) {
+            bestScore = finalScore;
+            localStorage.setItem(STORAGE_KEY, String(bestScore));
+            bestEl.textContent = String(bestScore).padStart(4, "0");
+            newRecord = true;
+          }
+          overlayBestTag.style.display = newRecord ? "block" : "none";
+
+          overlay.style.display = "flex";
+        }
+
+        // ---------- RENDERIZAÇÃO ----------
+        function drawGround() {
+          ctx.strokeStyle = isDayTime ? "#1a1633" : "#39ffe4";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, GROUND_Y + 2);
+          ctx.lineTo(W, GROUND_Y + 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = isDayTime ? "rgba(26,22,51,0.2)" : "#20164d";
+          ctx.lineWidth = 3;
+          const dashLen = 26;
+          const gap = 18;
+          const offset = (frame * speed) % (dashLen + gap);
+          ctx.beginPath();
+          for (let x = -offset; x < W; x += dashLen + gap) {
+            ctx.moveTo(x, GROUND_Y + 10);
+            ctx.lineTo(x + dashLen, GROUND_Y + 10);
+          }
+          ctx.stroke();
+        }
+
+        function drawClouds() {
+          ctx.fillStyle = isDayTime
+            ? "rgba(26, 22, 51, 0.12)"
+            : "rgba(80, 70, 160, 0.2)";
+          clouds.forEach((c) => {
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        function drawDino() {
+          ctx.save();
+          const ducking = dino.isDucking && !dino.isJumping;
+          const x = dino.x;
+          const y = ducking ? GROUND_Y - dino.duckHeight : dino.y;
+          const w = ducking ? dino.width + 12 : dino.width;
+          const h = ducking ? dino.duckHeight : dino.height;
+
+          // Se estiver com fruta de velocidade, brilha em verde. Senão, usa a cor personalizada!
+          const mainColor = speedMultiplier > 1.0 ? "#39ff14" : dinoCustomColor;
+
+          ctx.shadowColor = mainColor;
+          ctx.shadowBlur = isDayTime ? 3 : 10;
+          ctx.fillStyle = mainColor;
+          roundRect(ctx, x, y, w, h, 4);
+          ctx.fill();
+
+          // Olho do Dino (Muda de cor conforme o fundo para se manter visível)
+          ctx.shadowBlur = 0;
+          const eyeColor =
+            getLightness(mainColor) > 0.6 ? "#06040f" : "#ffffff";
+          ctx.fillStyle = eyeColor;
+          ctx.fillRect(x + w - 12, y + (ducking ? 6 : 8), 6, 4);
+
+          if (!ducking) {
+            ctx.fillStyle = mainColor;
+            const legOffset = dino.isJumping ? 4 : Math.sin(dino.legPhase) * 5;
+            ctx.fillRect(x + 4, y + h, 8, 4 + Math.max(0, legOffset));
+            ctx.fillRect(x + w - 12, y + h, 8, 4 + Math.max(0, -legOffset));
+          }
+
+          // --- DESENHAR ACESSÓRIOS EQUIPADOS ---
+          ctx.shadowBlur = isDayTime ? 1 : 10;
+
+          // 1.🧣 Cachecol (Fica atrás/pescoço)
+          if (equipped.scarf) {
+            ctx.fillStyle = "#ff007f";
+            ctx.shadowColor = "#ff007f";
+            // Nó do cachecol no pescoço
+            ctx.fillRect(x + 2, y + (ducking ? 10 : 16), 14, 6);
+            // Ponta solta oscilante
+            const scarfWiggle = Math.sin(frame * 0.2) * 6;
+            ctx.beginPath();
+            ctx.moveTo(x + 4, y + (ducking ? 14 : 20));
+            ctx.lineTo(x - 12, y + (ducking ? 18 : 24) + scarfWiggle);
+            ctx.lineTo(x - 8, y + (ducking ? 22 : 28) + scarfWiggle);
+            ctx.lineTo(x + 8, y + (ducking ? 14 : 20));
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          // 2. 🎩 Cartola
+          if (equipped.hat) {
+            ctx.fillStyle = "#9400d3";
+            ctx.shadowColor = "#9400d3";
+            // Aba da cartola
+            ctx.fillRect(x + w - 32, y - 4, 28, 4);
+            // Corpo da cartola
+            ctx.fillRect(x + w - 26, y - 24, 16, 20);
+            // Faixa rosa brilhante da cartola
+            ctx.fillStyle = "#ff007f";
+            ctx.shadowColor = "#ff007f";
+            ctx.fillRect(x + w - 26, y - 8, 16, 4);
+          }
+
+          // 3. 🕶️ Óculos Cyberpunk
+          if (equipped.glasses) {
+            ctx.fillStyle = "#ff0055";
+            ctx.shadowColor = "#ff0055";
+            // Lente dos óculos
+            ctx.fillRect(x + w - 16, y + (ducking ? 4 : 6), 18, 6);
+            // Haste dos óculos
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(x + w - 28, y + (ducking ? 4 : 6), 12, 2);
+          }
+
+          // 4. 👨 Bigode Retro
+          if (equipped.mustache) {
+            ctx.fillStyle = "#ffaa00";
+            ctx.shadowColor = "#ffaa00";
+            // Curva do bigode saindo do focinho
+            ctx.fillRect(x + w - 6, y + (ducking ? 12 : 14), 10, 4);
+            ctx.fillRect(x + w - 8, y + (ducking ? 14 : 16), 6, 4);
+          }
+
+          ctx.restore();
+        }
+
+        function drawObstacles() {
+          ctx.save();
+          obstacles.forEach((o) => {
+            if (o.type === "cactus") {
+              ctx.fillStyle = "#ffe14d";
+              ctx.shadowColor = "#ffe14d";
+              ctx.shadowBlur = isDayTime ? 2 : 8;
+              roundRect(ctx, o.x, o.y, o.width, o.height, 4);
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = "#06040f";
+              for (let i = 1; i < o.segs; i++) {
+                const sx = o.x + (o.width / o.segs) * i;
+                ctx.fillRect(sx - 1, o.y + 2, 2, o.height - 4);
+              }
+            } else if (o.type === "laser") {
+              ctx.fillStyle = "#ff0055";
+              ctx.shadowColor = "#ff0055";
+              ctx.shadowBlur = 8;
+              roundRect(ctx, o.x, o.y, o.width, o.height, 3);
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = "#ffffff";
+              ctx.fillRect(o.x + 2, o.y + o.height / 2 - 1, o.width - 4, 2);
+            } else if (o.type === "landmine") {
+              ctx.fillStyle = isDayTime ? "#100c24" : "#443f56";
+              roundRect(ctx, o.x, o.y, o.width, o.height, 2);
+              ctx.fill();
+
+              const flash = Math.floor(o.flashTimer) % 2 === 0;
+              ctx.fillStyle = flash ? "#ff0055" : "#1e1124";
+              ctx.shadowColor = "#ff0055";
+              ctx.shadowBlur = flash ? 8 : 0;
+              ctx.beginPath();
+              ctx.arc(o.x + o.width / 2, o.y + 2, 3, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              const flap = Math.sin(o.wingPhase) * 6;
+              ctx.fillStyle = "#2323ff";
+              ctx.shadowColor = "#2323ff";
+              ctx.shadowBlur = isDayTime ? 2 : 8;
+
+              roundRect(ctx, o.x + 8, o.y + 6, o.width - 16, 10, 4);
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+              ctx.beginPath();
+              ctx.moveTo(o.x + o.width / 2, o.y + 8);
+              ctx.lineTo(o.x, o.y - flap);
+              ctx.lineTo(o.x + o.width / 2 - 2, o.y + 10);
+              ctx.closePath();
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.moveTo(o.x + o.width / 2, o.y + 8);
+              ctx.lineTo(o.x + o.width, o.y - flap);
+              ctx.lineTo(o.x + o.width / 2 + 2, o.y + 10);
+              ctx.closePath();
+              ctx.fill();
+            }
+          });
+          ctx.restore();
+        }
+
+        function drawItems() {
+          ctx.save();
+          items.forEach((item) => {
+            if (item.type === "speed_fruit") {
+              const yOffset = Math.sin(item.bobPhase) * 4;
+
+              ctx.fillStyle = "#39ff14";
+              ctx.shadowColor = "#39ff14";
+              ctx.shadowBlur = 10;
+
+              ctx.beginPath();
+              ctx.arc(
+                item.x + item.width / 2,
+                item.y + item.height / 2 + yOffset,
+                7,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = "#a1ff8c";
+              ctx.fillRect(item.x + item.width / 2, item.y + yOffset, 3, 4);
+            }
+          });
+          ctx.restore();
+        }
+
+        function drawMeteor() {
+          if (!meteor) return;
+          ctx.save();
+          ctx.shadowColor = "#ff5a00";
+          ctx.shadowBlur = 20;
+          ctx.fillStyle = "#ffb400";
+          ctx.beginPath();
+          ctx.arc(meteor.x, meteor.y, meteor.size, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(meteor.x, meteor.y, meteor.size * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        function drawParticles() {
+          particles.forEach((p) => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 2, 2);
+          });
+        }
+
+        function roundRect(c, x, y, w, h, r) {
+          c.beginPath();
+          c.moveTo(x + r, y);
+          c.arcTo(x + w, y, x + w, y + h, r);
+          c.arcTo(x + w, y + h, x, y + h, r);
+          c.arcTo(x, y + h, x, y, r);
+          c.arcTo(x, y, x + w, y, r);
+          c.closePath();
+        }
+
+        function draw() {
+          ctx.save();
+
+          // TREMOR APOCALÍPTICO DE 5 SEGUNDOS
+          if (screenShake > 0) {
+            const dx = (Math.random() - 0.5) * screenShake;
+            const dy = (Math.random() - 0.5) * screenShake;
+            ctx.translate(dx, dy);
+          }
+
+          const bgR = Math.round(6 + (220 - 6) * dayTransition);
+          const bgG = Math.round(4 + (225 - 4) * dayTransition);
+          const bgB = Math.round(15 + (255 - 15) * dayTransition);
+          ctx.fillStyle = `rgb(${bgR}, ${bgG}, ${bgB})`;
+          ctx.fillRect(0, 0, W, H);
+
+          drawClouds();
+          drawGround();
+          drawObstacles();
+          drawItems();
+          drawMeteor();
+          drawDino();
+          drawParticles();
+
+          // Desenha o Clarão Branco de Impacto
+          if (flashOpacity > 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
+            ctx.fillRect(0, 0, W, H);
+          }
+
+          ctx.restore();
+        }
+
+        function loop(now) {
+          if (!isRunning) return;
+          rafId = requestAnimationFrame(loop);
+
+          const delta = now - lastTime;
+          if (delta >= FRAME_DURATION) {
+            lastTime = now - (delta % FRAME_DURATION);
+            update();
+            draw();
+          }
+        }
+
+        window.addEventListener("keydown", (e) => {
+          if (e.code === "Space" || e.code === "ArrowUp") {
+            e.preventDefault();
+            jump();
+          } else if (e.code === "ArrowDown") {
+            e.preventDefault();
+            duck(true);
+          }
+        });
+
+        window.addEventListener("keyup", (e) => {
+          if (e.code === "ArrowDown") {
+            duck(false);
+          }
+        });
+
+        canvas.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          jump();
+        });
+
+        restartBtn.addEventListener("click", () => {
+          resetGame();
+          startGame();
+        });
+
+        resetGame();
+      })();
+    </script>
+  </body>
+</html>

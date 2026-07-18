@@ -4,6 +4,8 @@ import { Container } from "../../Components/Container";
 import { Logo } from "../../Components/Logo";
 import "./main.css";
 import { gamesInfos } from "../../utils/gamesInfos";
+import { Foot } from "../../Components/Foot";
+import SearchBar from "../../Components/SearchBar";
 export function Main() {
   console.log(gamesInfos);
   return (
@@ -13,6 +15,7 @@ export function Main() {
           <BigText>
             Bem vindo a <Logo></Logo>
           </BigText>
+          <SearchBar></SearchBar>
           <div className="card-area">
             {gamesInfos.map((game) => (
               <Card
@@ -26,6 +29,7 @@ export function Main() {
           </div>
         </div>
       </Container>
+      <Foot></Foot>
     </>
   );
 }

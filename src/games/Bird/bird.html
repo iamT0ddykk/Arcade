@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyber-Flap // Neon Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Reset e Base */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      body {
+        background: radial-gradient(
+          circle,
+          #131327 0%,
+          #070714 60%,
+          #000000 100%
+        );
+        color: #ffffff;
+        font-family: "Rubik", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Efeito de Estrelas Cintilantes (Fundo) */
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image:
+          radial-gradient(
+            white,
+            rgba(255, 255, 255, 0.2) 2px,
+            transparent 40px
+          ),
+          radial-gradient(
+            white,
+            rgba(255, 255, 255, 0.15) 1px,
+            transparent 30px
+          ),
+          radial-gradient(white, rgba(255, 255, 255, 0.1) 2px, transparent 40px);
+        background-size:
+          550px 550px,
+          350px 350px,
+          250px 250px;
+        background-position:
+          0 0,
+          40px 60px,
+          130px 270px;
+        animation: twinkle 10s linear infinite;
+        opacity: 0.4;
+        z-index: 1;
+      }
+
+      @keyframes twinkle {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-1000px);
+        }
+      }
+
+      /* Gabinete do Arcade */
+      #board-wrap {
+        position: relative;
+        z-index: 2;
+        padding: 12px;
+        background: linear-gradient(135deg, #1b1b3a, #0b0b16);
+        border: 4px solid #2323ff;
+        border-radius: 16px;
+        box-shadow:
+          0 0 20px rgba(35, 35, 255, 0.4),
+          inset 0 0 15px rgba(35, 35, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Canvas de Jogo */
+      canvas {
+        display: block;
+        background: #050510;
+        border-radius: 8px;
+        border: 2px solid #00f0ff;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+      }
+
+      /* Interface HUD */
+      #hud {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 0 5px;
+      }
+
+      .hud-title {
+        font-family: "Press Start 2P", monospace;
+        font-size: 14px;
+        color: #00f0ff;
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      }
+
+      .hud-score {
+        font-family: "Press Start 2P", monospace;
+        font-size: 16px;
+        color: #ffe14d;
+        text-shadow: 0 0 8px rgba(255, 225, 77, 0.6);
+      }
+
+      /* Instruções de Controle */
+      .controls-info {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #a0a0c0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Overlay de GameOver / Menu Inicial */
+      #overlay {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        background: rgba(5, 5, 16, 0.9);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        transition: all 0.3s ease;
+      }
+
+      .overlay-title {
+        font-family: "Press Start 2P", monospace;
+        font-size: 24px;
+        color: #ff0055;
+        text-shadow: 0 0 15px #ff0055;
+        margin-bottom: 20px;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      .overlay-stats {
+        background: rgba(35, 35, 255, 0.1);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        padding: 15px 25px;
+        margin-bottom: 30px;
+        text-align: center;
+        min-width: 220px;
+      }
+
+      .stat-line {
+        font-size: 14px;
+        margin: 8px 0;
+        color: #ffffff;
+      }
+
+      .stat-val {
+        font-family: "Press Start 2P", monospace;
+        color: #ffe14d;
+        margin-left: 10px;
+      }
+
+      /* Botão de Ação */
+      .btn-action {
+        font-family: "Rubik", sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        color: #050510;
+        background: linear-gradient(90deg, #ffe14d, #ffae00);
+        box-shadow: 0 0 15px rgba(255, 225, 77, 0.5);
+        transition:
+          transform 0.1s ease,
+          box-shadow 0.2s ease;
+        outline: none;
+      }
+
+      .btn-action:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(255, 225, 77, 0.8);
+      }
+
+      .btn-action:active {
+        transform: scale(0.98);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board-wrap">
+      <div id="hud">
+        <span class="hud-title">CYBER_FLAP.EXE</span>
+        <span id="live-score" class="hud-score">000</span>
+      </div>
+
+      <canvas id="gameCanvas" width="380" height="520"></canvas>
+
+      <div class="controls-info">Pressione ESPAÇO ou Toque na tela</div>
+
+      <div id="overlay">
+        <h1 id="overlay-title" class="overlay-title">NEON<br />ARCADE</h1>
+        <div class="overlay-stats">
+          <div class="stat-line">
+            SCORE: <span id="score-val" class="stat-val">0</span>
+          </div>
+          <div class="stat-line">
+            BEST: <span id="high-val" class="stat-val">0</span>
+          </div>
+        </div>
+        <button id="btn-play" class="btn-action">INICIAR</button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Elementos de UI do DOM
+      const overlay = document.getElementById("overlay");
+      const overlayTitle = document.getElementById("overlay-title");
+      const scoreVal = document.getElementById("score-val");
+      const highVal = document.getElementById("high-val");
+      const btnPlay = document.getElementById("btn-play");
+      const liveScore = document.getElementById("live-score");
+
+      // Parâmetros Físicos e Configurações
+      const GRAVITY = 0.45;
+      const JUMP_FORCE = -7.5;
+      const PIPE_SPEED = 2.5;
+      const PIPE_SPAWN_RATE = 95; // Quadros entre novos obstáculos
+      const PIPE_GAP = 135; // Espaço vertical livre entre os tubos
+
+      // Estados Globais
+      let gameActive = false;
+      let isGameOver = false;
+      let score = 0;
+      let highScore = localStorage.getItem("cyber_flap_high") || 0;
+
+      // Entidades
+      let player;
+      let pipes = [];
+      let particles = [];
+      let frameCount = 0;
+
+      // Representação do Jogador (Nave Cyberpunk)
+      class Player {
+        constructor() {
+          this.x = 70;
+          this.y = canvas.height / 2;
+          this.radius = 12;
+          this.velocity = 0;
+          this.targetRotation = 0;
+          this.currentRotation = 0;
+        }
+
+        jump() {
+          if (gameActive) {
+            this.velocity = JUMP_FORCE;
+            // Gera faíscas azuis ao saltar
+            createSparks(this.x - 10, this.y, "#00f0ff", 8);
+          }
+        }
+
+        update() {
+          this.velocity += GRAVITY;
+          this.y += this.velocity;
+
+          // Restringe teto e chão
+          if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.velocity = 0;
+          }
+          if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
+            triggerGameOver();
+          }
+
+          // Efeito suave de rotação de acordo com a velocidade de queda
+          this.targetRotation = Math.min(
+            Math.max(this.velocity * 0.05, -0.6),
+            0.8,
+          );
+          this.currentRotation +=
+            (this.targetRotation - this.currentRotation) * 0.2;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.currentRotation);
+
+          // Configuração de Brilho Neon
+          ctx.shadowColor = "#00f0ff";
+          ctx.shadowBlur = 12;
+
+          // Desenho da nave (triângulo estilizado futurista)
+          ctx.fillStyle = "#00f0ff";
+          ctx.beginPath();
+          ctx.moveTo(18, 0); // Bico (frente)
+          ctx.lineTo(-12, -10); // Asa Superior
+          ctx.lineTo(-6, 0); // Recorte do Motor
+          ctx.lineTo(-12, 10); // Asa Inferior
+          ctx.closePath();
+          ctx.fill();
+
+          // Núcleo brilhante da Nave
+          ctx.shadowColor = "#ffffff";
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(-2, 0, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      // Obstáculos (Portais de Laser Neon)
+      class Pipe {
+        constructor() {
+          this.x = canvas.width;
+          this.width = 54;
+          this.topHeight =
+            Math.floor(Math.random() * (canvas.height - PIPE_GAP - 100)) + 50;
+          this.bottomY = this.topHeight + PIPE_GAP;
+          this.bottomHeight = canvas.height - this.bottomY;
+          this.passed = false;
+          this.color = Math.random() > 0.5 ? "#ffe14d" : "#2323ff"; // Alterna cores neon
+        }
+
+        update() {
+          this.x -= PIPE_SPEED;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.shadowBlur = 15;
+
+          // Desenho do cano superior
+          ctx.shadowColor = this.color;
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 3;
+          ctx.fillStyle = "rgba(10, 10, 30, 0.85)";
+
+          // Tubo de Cima
+          ctx.fillRect(this.x, 0, this.width, this.topHeight);
+          ctx.strokeRect(this.x, -10, this.width, this.topHeight + 10);
+
+          // Tubo de Baixo
+          ctx.fillRect(this.x, this.bottomY, this.width, this.bottomHeight);
+          ctx.strokeRect(
+            this.x,
+            this.bottomY,
+            this.width,
+            this.bottomHeight + 10,
+          );
+
+          // Bordas/Bocais em destaque neon mais brilhante
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.x - 3, this.topHeight - 12, this.width + 6, 12);
+          ctx.fillRect(this.x - 3, this.bottomY, this.width + 6, 12);
+
+          ctx.restore();
+        }
+
+        checkCollision(p) {
+          const withinX =
+            p.x + p.radius > this.x && p.x - p.radius < this.x + this.width;
+          const hitTop = p.y - p.radius < this.topHeight;
+          const hitBottom = p.y + p.radius > this.bottomY;
+
+          return withinX && (hitTop || hitBottom);
+        }
+      }
+
+      // Partículas Estéticas para Efeitos (Faíscas de Impacto/Pulo)
+      class Particle {
+        constructor(x, y, color, speedMultiplier = 1) {
+          this.x = x;
+          this.y = y;
+          this.size = Math.random() * 3.5 + 1.5;
+          this.speedX = (Math.random() * -2 - 1) * speedMultiplier;
+          this.speedY = (Math.random() * 2 - 1) * speedMultiplier;
+          this.life = 1.0;
+          this.decay = Math.random() * 0.03 + 0.02;
+          this.color = color;
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.life -= this.decay;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.life;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = this.color;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Função utilitária para gerar faíscas dinâmicas
+      function createSparks(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle(x, y, color, 2));
+        }
+      }
+
+      // Inicialização / Reset de Jogo
+      function resetGame() {
+        frameCount = 0;
+        score = 0;
+        liveScore.textContent = "000";
+        pipes = [];
+        particles = [];
+        player = new Player();
+        isGameOver = false;
+        gameActive = true;
+
+        overlay.style.display = "none";
+      }
+
+      // Game Over
+      function triggerGameOver() {
+        if (isGameOver) return;
+        isGameOver = true;
+        gameActive = false;
+
+        // Efeito explosivo na nave
+        createSparks(player.x, player.y, "#ff0055", 25);
+        createSparks(player.x, player.y, "#00f0ff", 15);
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem("cyber_flap_high", highScore);
+        }
+
+        // Exibir Tela de Fim de Jogo
+        setTimeout(() => {
+          overlayTitle.innerHTML = "SISTEMA<br>FALHOU";
+          overlayTitle.style.color = "#ff0055";
+          overlayTitle.style.textShadow = "0 0 15px #ff0055";
+          scoreVal.textContent = score;
+          highVal.textContent = highScore;
+          btnPlay.textContent = "REINICIAR";
+          overlay.style.display = "flex";
+        }, 750);
+      }
+
+      // Atualização Geral de Estado (Lógica)
+      function update() {
+        if (!gameActive) return;
+
+        frameCount++;
+        player.update();
+
+        // Gerenciador de Obstáculos (Pipes)
+        if (frameCount % PIPE_SPAWN_RATE === 0) {
+          pipes.push(new Pipe());
+        }
+
+        for (let i = pipes.length - 1; i >= 0; i--) {
+          pipes[i].update();
+
+          // Detecção de Colisão
+          if (pipes[i].checkCollision(player)) {
+            triggerGameOver();
+          }
+
+          // Incremento de Pontuação
+          if (!pipes[i].passed && pipes[i].x + pipes[i].width < player.x) {
+            score++;
+            pipes[i].passed = true;
+            liveScore.textContent = String(score).padStart(3, "0");
+            // Efeito de brilho ao pontuar
+            createSparks(player.x + 20, player.y, "#ffe14d", 8);
+          }
+
+          // Limpeza de arrays antigos fora da tela
+          if (pipes[i].x + pipes[i].width < 0) {
+            pipes.splice(i, 1);
+          }
+        }
+
+        // Atualização de Partículas (apenas faíscas ativas)
+        for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].update();
+          if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+      }
+
+      // Renderização Gráfica do Canvas
+      function draw() {
+        // Limpa o frame anterior preservando transparência sutil para efeito motion blur
+        ctx.fillStyle = "rgba(5, 5, 16, 0.3)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Desenhar elementos de fundo sutis (Linhas de Grade Cyberpunk)
+        ctx.save();
+        ctx.strokeStyle = "rgba(35, 35, 255, 0.05)";
+        ctx.lineWidth = 1;
+        const gridSize = 40;
+        for (let x = 0; x < canvas.width; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Renderiza Partículas primeiro (atrás)
+        particles.forEach((p) => p.draw());
+
+        // Renderiza Canos
+        pipes.forEach((pipe) => pipe.draw());
+
+        // Renderiza Jogador (Frente)
+        if (player) {
+          player.draw();
+        }
+      }
+
+      // Game Loop contínuo
+      function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      // Eventos e Controles de Entrada
+      function handleInput(e) {
+        if (e.code === "Space") {
+          e.preventDefault();
+        }
+
+        if (gameActive && (e.code === "Space" || e.type === "touchstart")) {
+          player.jump();
+        }
+      }
+
+      window.addEventListener("keydown", handleInput);
+      canvas.addEventListener("touchstart", handleInput);
+
+      btnPlay.addEventListener("click", () => {
+        resetGame();
+      });
+
+      // Configuração inicial da Tela de Boas-vindas
+      highVal.textContent = highScore;
+
+      loop();
+    </script>
+  </body>
+</html>

@@ -21,4 +21,25 @@ export const gamesInfos: gamesModel[] = [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvQAqbzcqTdcrtR13guhrxVlTkohn7gTX5gbxz81y-sA&s=10",
     gameLinkTo: "/Snake",
   },
+  {
+    gameName: "Dino",
+    gameCategory: "runner",
+    gameImg:
+      "https://play-lh.googleusercontent.com/Y0EyvWAWSoLbExn9Y1e_OYJv9-jdtSKvbUCtQk2VXYbwLQN9NEbsNG1ndsfrltUhy7l-NmTNABNth2yvMRE8qw=w526-h296-rw",
+    gameLinkTo: "/Dino",
+  },
+  {
+    gameName: "Bird",
+    gameCategory: "hard",
+    gameImg:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKcjVjdmqoblRlTvLhvTdcM2XfI_M0VJwaQd8MdgCaPA&s=10",
+    gameLinkTo: "/Bird",
+  },
+  {
+    gameName: "Zombie",
+    gameCategory: "survival",
+    gameImg:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuGAzs49gIXNXAXZRF68q1y-LOfJKqXsBbML2me5Q7msvyEHRFdDjmIrU&s=10",
+    gameLinkTo: "/Zombie",
+  },
 ];
